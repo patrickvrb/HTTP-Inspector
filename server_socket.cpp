@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
     char buffer[BUFFERSIZE];
 
         /* Criando o Socket */
-    if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
+    if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         /* IPV4, TCP, IP = 0 */
         printf("Socket Falhou!\n");
@@ -22,6 +22,7 @@ int main(int argc, char const *argv[])
     else printf("Socket Criado com Sucesso!\n");
 
     address.sin_family = AF_INET;   /* Protocolo IPV4 */
+    address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT); /* Porta padrão 8228 */
 
     /* Socket para a porta padrão */
