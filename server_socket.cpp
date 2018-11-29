@@ -9,8 +9,8 @@
 int main(int argc, char const *argv[])
 {
     struct sockaddr_in address; /*Struct pra Internet Address */
-    int server_socket, new_socket, valread;
     int addrlen = sizeof(address);
+    int server_socket, new_socket, valread;
     char buffer[BUFFERSIZE];
 
         /* Criando o Socket */
