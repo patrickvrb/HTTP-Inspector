@@ -12,7 +12,6 @@
 
 #define BUFFERSIZE 4096
 
-#include "local_proxy.hpp"
 
  int main(int argc,char *argv[])
  {
@@ -82,6 +81,7 @@
  void *runSocket(void *vargp)
  {
     struct serverInfo *info = (struct serverInfo *)vargp;
+
     char buffer[BUFFERSIZE];
     int bytes =0;
        printf("Cliente: %d\n",info->client_fd);
@@ -92,11 +92,13 @@
        int server_fd =0;
        struct sockaddr_in server_sd;
        // create a socket
+
        server_fd = socket(AF_INET, SOCK_STREAM, 0);
        if(server_fd < 0)
        {
             printf("server socket not created\n");
        }
+
        printf("Socket do Servidor Criado!\n");
        memset(&server_sd, 0, sizeof(server_sd));
        // set socket variables
@@ -104,10 +106,12 @@
        server_sd.sin_port = htons(atoi(info->port));
        server_sd.sin_addr.s_addr = inet_addr(info->ip);
        //connect to main server from this proxy server
+
        if((connect(server_fd, (struct sockaddr *)&server_sd, sizeof(server_sd)))<0)
        {
             printf("server connection not established");
        }
+
        printf("Socket do Servidor Conectado!\n");
        while(1)
        {
@@ -119,14 +123,16 @@
             }
             else
             {
-                 // send data to main server
+
+                 //Data p/ server
                  write(server_fd, buffer, sizeof(buffer));
                  //printf("client fd is : %d\n",c_fd);
-                 printf("\nFrom client: %s", buffer);
-                 //fputs(buffer,stdout);
-                 fflush(stdout);
+                 printf("From client :\n");
+                 fputs(buffer,stdout);
+                   fflush(stdout);
             }
-            //recieve response from server
+            //Resposta do server
+
             memset(&buffer, '\0', sizeof(buffer));
             bytes = read(server_fd, buffer, sizeof(buffer));
             if(bytes <= 0)
@@ -134,10 +140,12 @@
             }
             else
             {
-                 // send response back to client
+
+                 // Resposta pro client
                  write(info->client_fd, buffer, sizeof(buffer));
-                 printf("From server: %s", buffer);
+                 printf("From server :\n");
                  //fputs(buffer,stdout);
+
             }
        };
     return NULL;
@@ -150,14 +158,18 @@
    int i;
    if ( (he = gethostbyname( hostname ) ) == NULL)
    {
-     // get the host info
+
+     //Informação do Host BUG
+
      herror("gethostbyname");
      return 1;
    }
    addr_list = (struct in_addr **) he->h_addr_list;
    for(i = 0; addr_list[i] != NULL; i++)
    {
-     //Return the first one;
+
+     //Retorna primeiro endereço da address list BUG
+
      strcpy(ip , inet_ntoa(*addr_list[i]) );
      return 0;
    }

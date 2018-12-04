@@ -16,6 +16,7 @@ int main(int argc, char const *argv[])
 
     int sock = 0, valread, cont = 1;
     char const *hello = "O cliente diz oi!";
+
     char request[BUFFERSIZE], response[BUFFERSIZE], buffer[BUFFERSIZE];
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -28,7 +29,9 @@ int main(int argc, char const *argv[])
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
+
     serv_addr.sin_addr.s_addr = INADDR_ANY;
+
 
     /* Converter enderecos IPv4 and IPv6 para binario */
     if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
