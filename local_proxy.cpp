@@ -10,22 +10,23 @@
 
 #define PORT 8228 /* Porta Proxy Local 8228 */
 
-#include "local_proxy.hpp"
+#define BUFFERSIZE 4096
+
 
  int main(int argc,char *argv[])
  {
      pthread_t tid;
      char port[100];
-     char ip[100] = "127.0.0.1";
-     char const *hostname = "127.0.0.1";
+     char ip[100] = "172.217.162.174";
+     char const *hostname = "172.217.162.174";
      char proxy_port[100];
 
      //strcpy(ip,argv[1]); // IP do Server
      strcpy(port,argv[1]);  // Porta do Servidor
      strcpy(proxy_port,argv[2]); // Porta do Proxy
 
-      printf("IP do server: %s and port %s \n", ip, port);
-      printf("Porta do server: %s \n", proxy_port);
+      printf("IP do server: %s na porta %s \n", ip, port);
+      printf("Porta do proxy: %s \n", proxy_port);
 
       //Variaveis do Socket
       int proxy_fd = 0, client_fd = 0;
@@ -80,35 +81,41 @@
  void *runSocket(void *vargp)
  {
     struct serverInfo *info = (struct serverInfo *)vargp;
-    char buffer[65535];
+
+    char buffer[BUFFERSIZE];
     int bytes =0;
-       printf("client:%d\n",info->client_fd);
-       fputs(info->ip,stdout);
-       fputs(info->port,stdout);
-       //Conectar ao server pelo proxy
+       printf("Cliente: %d\n",info->client_fd);
+       //fputs(info->ip,stdout);
+       //fputs(,stdout);
+       printf("IP do server: %s na porta %s \n", info->ip, info->port);
+       //code to connect to main server via this proxy server
        int server_fd =0;
        struct sockaddr_in server_sd;
-       // Criando o server socket
+       // create a socket
+
        server_fd = socket(AF_INET, SOCK_STREAM, 0);
        if(server_fd < 0)
        {
             printf("server socket not created\n");
        }
-       printf("server socket created\n");
+
+       printf("Socket do Servidor Criado!\n");
        memset(&server_sd, 0, sizeof(server_sd));
-       //Variaveis padrão do socket
+       // set socket variables
        server_sd.sin_family = AF_INET;
        server_sd.sin_port = htons(atoi(info->port));
        server_sd.sin_addr.s_addr = inet_addr(info->ip);
-       //Conectar ao server socket
+       //connect to main server from this proxy server
+
        if((connect(server_fd, (struct sockaddr *)&server_sd, sizeof(server_sd)))<0)
        {
             printf("server connection not established");
        }
-       printf("server socket connected\n");
+
+       printf("Socket do Servidor Conectado!\n");
        while(1)
        {
-            //Client data
+            //receive data from client
             memset(&buffer, '\0', sizeof(buffer));
             bytes = read(info->client_fd, buffer, sizeof(buffer));
             if(bytes <= 0)
@@ -116,6 +123,7 @@
             }
             else
             {
+
                  //Data p/ server
                  write(server_fd, buffer, sizeof(buffer));
                  //printf("client fd is : %d\n",c_fd);
@@ -124,6 +132,7 @@
                    fflush(stdout);
             }
             //Resposta do server
+
             memset(&buffer, '\0', sizeof(buffer));
             bytes = read(server_fd, buffer, sizeof(buffer));
             if(bytes <= 0)
@@ -131,10 +140,12 @@
             }
             else
             {
+
                  // Resposta pro client
                  write(info->client_fd, buffer, sizeof(buffer));
                  printf("From server :\n");
-                 fputs(buffer,stdout);
+                 //fputs(buffer,stdout);
+
             }
        };
     return NULL;
@@ -147,14 +158,18 @@
    int i;
    if ( (he = gethostbyname( hostname ) ) == NULL)
    {
+
      //Informação do Host BUG
+
      herror("gethostbyname");
      return 1;
    }
    addr_list = (struct in_addr **) he->h_addr_list;
    for(i = 0; addr_list[i] != NULL; i++)
    {
+
      //Retorna primeiro endereço da address list BUG
+
      strcpy(ip , inet_ntoa(*addr_list[i]) );
      return 0;
    }

@@ -7,16 +7,17 @@
 #include <arpa/inet.h>
 #define PORT 5000 /* Porta Proxy Local 5000 */
 
-#define BUFFERSIZE 65535
+#define BUFFERSIZE 4096
 
 int main(int argc, char const *argv[])
 {
     struct sockaddr_in address;
     struct sockaddr_in serv_addr;
 
-    int sock = 0, valread;
+    int sock = 0, valread, cont = 1;
     char const *hello = "O cliente diz oi!";
-    char buffer[BUFFERSIZE];
+
+    char request[BUFFERSIZE], response[BUFFERSIZE], buffer[BUFFERSIZE];
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -24,11 +25,13 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    memset(&serv_addr, '0', sizeof(serv_addr));
+    //memset(&serv_addr, '0', sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
-    //proxy_sd.sin_port = htons(atoi(proxy_port));
+
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+
 
     /* Converter enderecos IPv4 and IPv6 para binario */
     if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
@@ -45,15 +48,24 @@ int main(int argc, char const *argv[])
 
     while(1)
     {
-      printf("Digite aqui:");
-      fgets(buffer, sizeof(buffer), stdin);
+      printf("\nMensagem %d", cont++);
+      printf("\n*****************************************************");
+      printf("\nDigite aqui: ");
+      fgets(request, sizeof(request), stdin);
+      printf("Request: %s \n", request);
+      //send(sock, request, sizeof(request), 0);
       write(sock, buffer, sizeof(buffer));
-      printf("\nServer response:\n");
-      read(sock, buffer, sizeof(buffer));
-      fputs(buffer, stdout);
-      //printf("\n");
+      //fflush(stdout);
+      printf("\nResposta do Servidor: ");
+      recv(sock, &response, sizeof(response), 0);
+      printf("Resposta do servidor: %s \n", response);
+      //read(sock, buffer, sizeof(buffer));
+      //fputs(buffer, stdout);
+      //printf("%s\n", buffer);
+      printf("*****************************************************\n");
+      fflush(stdout);
     }
-      //close(sd);
+      close(sock);
 
     /*
     send(sock , hello , strlen(hello) , 0 );
