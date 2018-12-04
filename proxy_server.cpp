@@ -31,8 +31,22 @@ int cache_cont = 1;
 
 int main(int argc, char const *argv[])
 {
-     int browser_socket;
+     int browser_socket, porta = 0;
 
+     printf("\n*******   HTTP INSPECTOR   *******\n");
+     printf("By: Danillo & Patrick\n");
+     printf("Teleinformática e Redes 2 - UnB\n");
+     printf("Deseja se conectar em qual porta? (0 - Padrão)   ");
+     scanf("%d", &porta);
+     if(porta == 0){
+          printf("Porta padrao 8228 selecionada!\n");
+          porta = PORT;
+     }
+     else 
+     {
+          printf("Porta %d selecionada!\n", porta);
+          printf("Não se esqueça de configurar o Proxy no Browser!\n");
+     }
      /* Criando o Socket */
      if ((browser_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0)
      {
@@ -45,7 +59,7 @@ int main(int argc, char const *argv[])
      struct sockaddr_in browser_addr;
      browser_addr.sin_family = AF_INET;
      browser_addr.sin_addr.s_addr = INADDR_ANY;
-     browser_addr.sin_port = htons(PORT);
+     browser_addr.sin_port = htons(porta);
 
      /* Bind */
      if (bind(browser_socket, (struct sockaddr *)&browser_addr, sizeof(browser_addr)) < 0)
@@ -85,8 +99,8 @@ int main(int argc, char const *argv[])
                     perror("Leitura");
                } else {
                     printf("Pedido do Browser:\n%s\n", request);
-                    // strcpy(response, server_response(request));
-                    response = server_response(request);
+                    strcpy(response, server_response(request));
+                    //response = server_response(request);
                     printf("Resposta do Servidor:\n%s\n", response);
                     if (save_cache(response, 0) != 0 )
                     {
@@ -219,7 +233,6 @@ char *server_response(char *request)
      else
      printf("Socket do Servidor Criado com Sucesso!\n");
 
-     setsockopt(proxy_server_socket, IPPROTO_TCP, TCP_NODELAY, (const char *)&lak, sizeof(int));
 
      struct sockaddr_in proxy_as_client_address;
      struct hostent *ref;
@@ -227,6 +240,7 @@ char *server_response(char *request)
      bcopy(ref->h_addr, &proxy_as_client_address.sin_addr, ref->h_length);
      proxy_as_client_address.sin_family = AF_INET;
      proxy_as_client_address.sin_port = htons(80);
+     setsockopt(proxy_server_socket, IPPROTO_TCP, TCP_NODELAY, (const char *)&lak, sizeof(int));
 
      if (connect(proxy_server_socket, (struct sockaddr *)&proxy_as_client_address, sizeof(struct sockaddr_in)) == -1)
      {
@@ -255,6 +269,7 @@ char *server_response(char *request)
      
      strcat(newrequest, hostname);
      strcat(newrequest, "/ HTTP/1.1\r\n\r\n");
+     printf("PROXY REQUEST: %s\n", newrequest);
 
      write(proxy_server_socket, newrequest, sizeof(newrequest));
      read(proxy_server_socket, response, BUFFEROP);
