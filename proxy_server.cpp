@@ -7,9 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <iostream>
-
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -38,7 +36,7 @@ using namespace std;
 int cache_cont = 1;
 
 int main(int argc, char const *argv[]) {
-     int browser_socket, porta = 0;
+     int browser_socket, porta = 0, tr=1;
 
      printf("\n*******   HTTP INSPECTOR   *******\n");
      printf("By: Danillo & Patrick\n");
@@ -59,6 +57,12 @@ int main(int argc, char const *argv[]) {
           /* IPV4, TCP, IP = 0 */
           printf("Socket Falhou!\n");
      } else printf("Socket Criado com Sucesso!\n");
+
+          // kill "Address already in use" error message
+     if (setsockopt(browser_socket,SOL_SOCKET,SO_REUSEADDR,&tr,sizeof(int)) == -1) {
+          perror("setsockopt");
+          exit(1);
+     }
 
      /* Definindo Variaveis do Socket*/
      struct sockaddr_in browser_addr;
