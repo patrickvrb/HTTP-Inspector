@@ -1,7 +1,7 @@
 /*
  * INSPETOR HTTP
- * Danillo Neves Souza - 14/0135839
- * Patrick Vitas Reguera  - 15/0143672
+ * Danillo Neves Souza        - 14/0135839
+ * Patrick Vitas Reguera Beal - 15/0143672
  */
 
 #include <stdio.h>
@@ -19,7 +19,6 @@
 
 #define PORT 8228 /* Porta Proxy Local 8228 */
 #define BUFFERSIZE 4096
-#define BUFFEROP 4096
 
 /* Cabecalho das Funcoes */
 char *server_response(char[]);
@@ -30,13 +29,14 @@ int  fileSearch(char *, FILE *);
 void sendBrowser(char *);
 int  findMethod(char *str);
 
-using namespace std;
-
 /* Variavel global para facilitar o save e o load da cache */
 int cache_cont = 1;
 
 int main(int argc, char const *argv[]) {
+
      int browser_socket, porta = 0, tr=1;
+     int browser_conn, message_status;
+     char request[BUFFERSIZE], *response;
 
      printf("\n*******   HTTP INSPECTOR   *******\n");
      printf("By: Danillo & Patrick\n");
@@ -58,19 +58,19 @@ int main(int argc, char const *argv[]) {
           printf("Socket Falhou!\n");
      } else printf("Socket Criado com Sucesso!\n");
 
-          // kill "Address already in use" error message
+     /* Liberando Socket utilizado em sessões anteriores */
      if (setsockopt(browser_socket,SOL_SOCKET,SO_REUSEADDR,&tr,sizeof(int)) == -1) {
-          perror("setsockopt");
+          perror("Erro com liberação do Socket!\n");
           exit(1);
      }
 
-     /* Definindo Variaveis do Socket*/
+     /* Definindo Variaveis do Socket */
      struct sockaddr_in browser_addr;
      browser_addr.sin_family = AF_INET;
      browser_addr.sin_addr.s_addr = INADDR_ANY;
      browser_addr.sin_port = htons(porta);
 
-     /* Realizando o Bind na Porta Selecionada*/
+     /* Realizando o Bind na Porta Selecionada */
      if (bind(browser_socket, (struct sockaddr *)&browser_addr, sizeof(browser_addr)) < 0) {
           printf("Bind falhou!\n");
           exit(-1);
@@ -82,26 +82,24 @@ int main(int argc, char const *argv[]) {
           exit(1);
      }
 
-     int browser_conn, message;
-     char request[BUFFERSIZE], *response;
-
-     response = (char *)malloc(BUFFEROP*sizeof(char));
+     response = (char *)malloc(BUFFERSIZE*sizeof(char));
 
      while (1) {
           /* Aceita qualquer conexão vindo do Socket*/
+
           browser_conn = accept(browser_socket, (struct sockaddr *)NULL, NULL);
 
           if (browser_conn <= 0) {
-               printf("Vish, deu ruim ao aceitar \n");
+               printf("Erro ao aceitar conexão com o Browser!\n");
                exit(-1);
           } else {
                printf("Conexão aceita! \n");
 
                //Recebe Request do Browser
                memset(&request, '\0', sizeof(request));
-               message = recv(browser_conn, request, sizeof(request), 0);
+               message_status = recv(browser_conn, request, sizeof(request), 0);
 
-               if (message < 0) {
+               if (message_status < 0) {
                     perror("Read Error");
                } else {
                     printf("Pedido do Browser:\n%s\n", request);
@@ -115,7 +113,7 @@ int main(int argc, char const *argv[]) {
                     }
 
                     /* Envia a Response do Servidor ao Browser */
-                    // TODO: O Browser nao abre a pagina
+                    // TO DO: O Browser nao abre a pagina
 
                     FILE *server_response;
                     server_response= fopen("server_response.txt","r");
@@ -127,8 +125,8 @@ int main(int argc, char const *argv[]) {
                     printf("Resposta do Servidor\n");
                     while(fread(response, 1, sizeof(response), server_response) == sizeof(response)) {
                          printf("%s\n", response); 
-                         message = send(browser_conn, response, sizeof(response), 0);
-                         if (message < 0) {
+                         message_status = send(browser_conn, response, sizeof(response), 0);
+                         if (message_status < 0) {
                               perror("Escrita");
                          }  
                          //bzero(response, BUFFERSIZE);  
@@ -151,6 +149,7 @@ int main(int argc, char const *argv[]) {
  * Ela cria outra conexao na porta 80 e envia o segmento HTTP contido em request
  * Antes, ela deve remontar o pedido HTTP e descobrir o IP do site atraves do Hostname
  */
+
 char *server_response(char *request)
 {
      char *hostname, *server_ip, c;
@@ -177,14 +176,10 @@ char *server_response(char *request)
           c = request[i];
      }
      hostname[j++] = '\0';
+
      strtok(hostname, "/");
      printf("Hostname: %s\n", hostname);
-
      get_ip(hostname, server_ip);
-
-     // To convert an Internet network address into ASCII string
-     // server_ip = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
-
      printf("IP Address: %s\n", server_ip);
 
      int proxy_server_socket, lak = 1;
@@ -213,7 +208,7 @@ char *server_response(char *request)
      printf("Servidor conectado\n\n");
 
      char *response;
-     response = (char*)malloc(sizeof(BUFFEROP));
+     response = (char*)malloc(sizeof(BUFFERSIZE));
 
      //Montando Request no formato padrao
 
@@ -245,7 +240,7 @@ char *server_response(char *request)
           exit(-1);
      }
 
-     while(read(proxy_server_socket, response, BUFFEROP)){ 
+     while(read(proxy_server_socket, response, BUFFERSIZE)){ 
           fprintf(server_response, "%s\n", response);   
           bzero(response, BUFFERSIZE);  
      }
@@ -441,8 +436,7 @@ void sendBrowser(char *str){
 
      char *http_data, c = str[0];
      http_data = (char *) malloc(BUFFERSIZE*sizeof(char));
-
-     int i = 1, j = 2;
+     int i = 1, j = 2, message_status;
 
      while (c != '<')
      {
@@ -488,10 +482,8 @@ void sendBrowser(char *str){
      }
      printf("Browser conectado\n\n");
 
-     int browser_conn, message;
-
-     message = write(proxy_socket, http_header, sizeof(http_header));
-     if (message < 0)
+     message_status = write(proxy_socket, http_header, sizeof(http_header));
+     if (message_status < 0)
      {
           perror("Erro no envio ao Browser");
      } else {
