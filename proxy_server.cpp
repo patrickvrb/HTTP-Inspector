@@ -106,6 +106,7 @@ int main(int argc, char const *argv[]) {
 
                     /* Envia o Request do Browser ao Servidor */
                     strcpy(response, server_response(request));
+                    printf("RESPOSTA PRÉCACHE:\n%s\n", response);
 
                     if (save_cache(response, 0) != 0 ) {
                          printf("Erro de cache\n");
@@ -122,9 +123,9 @@ int main(int argc, char const *argv[]) {
                          exit(-1);
                     }
 
-                    printf("Resposta do Servidor\n");
+                    printf("Resposta do Servidor:\n");
                     while(fread(response, 1, sizeof(response), server_response) == sizeof(response)) {
-                         printf("%s\n", response); 
+                         printf("%s", response); 
                          message_status = send(browser_conn, response, sizeof(response), 0);
                          if (message_status < 0) {
                               perror("Escrita");
@@ -226,12 +227,14 @@ char *server_response(char *request)
      }
 
      strcat(newrequest, hostname);
-     strcat(newrequest, "/ HTTP/1.1\r\n\r\n");
+     strcat(newrequest, "/ HTTP/1.1\r\nHost: ");
+     strcat(newrequest, hostname);
+     strcat(newrequest, "\r\n\r\n");
      printf("PROXY REQUEST: %s\n", newrequest);
 
      write(proxy_server_socket, newrequest, sizeof(newrequest));
      bzero(response, BUFFERSIZE);
-
+     
      FILE *server_response;
 
      server_response= fopen("server_response.txt","w");
@@ -241,11 +244,9 @@ char *server_response(char *request)
      }
 
      while(read(proxy_server_socket, response, BUFFERSIZE)){ 
-          fprintf(server_response, "%s\n", response);   
+          fputs(response, server_response);
           bzero(response, BUFFERSIZE);  
      }
-     //send(proxy_server_socket, request, sizeof(request), 0);
-     //recv(proxy_server_socket, &response, sizeof(response), 0);
 
      close(proxy_server_socket);
 
