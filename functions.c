@@ -33,15 +33,19 @@ void server_response(char *request, int mode)
     char *hostname, *server_ip, c;
     char newrequest[300];
     
-    printf("\nREQUEST MODO 1:%s", request);
+    //printf("\nREQUEST MODO 1:%s", request);
     int i = 1, j = 1;
 
     c = request[0];
     hostname = (char *)malloc(HOSTSIZE * sizeof(char));
-    server_ip = (char *)malloc(33 * sizeof(char));
+    server_ip = (char *)malloc(HOSTSIZE * sizeof(char));
     //printf("\nREQUEST SPIDER:%s-\n", request);
     /* Achar o hostname a partir do request */
     
+    char aux[HOSTSIZE];
+    bzero(aux, HOSTSIZE);
+    strcpy(aux, request);
+
     if(mode == 0) {
         while (c != '/')
         {
@@ -60,14 +64,19 @@ void server_response(char *request, int mode)
         printf("Hostname: %s\n", hostname); 
         
     }
-    else if (mode == 1) {
-        strtok(request, "/");
+    else if (mode == 1)
+     {
+        aux[HOSTSIZE-1] = '\0';
+        bzero(hostname, HOSTSIZE);
+        strcpy(hostname, aux);
+        strtok(hostname, "/");
         printf("Hostname: %s\n", hostname);
     }
     get_ip(hostname, server_ip);
     printf("IP Address: %s\n", server_ip);
     free(server_ip);
-
+    free(hostname);
+    //exit(0);
     int proxy_server_socket, lak = 1;
     if ((proxy_server_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0)
     {

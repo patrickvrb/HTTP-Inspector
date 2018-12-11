@@ -14,7 +14,7 @@
 #define PORT 8228 /* Porta Proxy Local 8228 */
 #define BUFFERSIZE 4096
 #define HREFSIZE 65535
-#define HOSTSIZE 100
+#define HOSTSIZE 300
 #define h_addr h_addr_list[0]
 
 struct List
