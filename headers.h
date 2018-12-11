@@ -9,6 +9,7 @@
 #include <resolv.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #define PORT 8228 /* Porta Proxy Local 8228 */
 #define BUFFERSIZE 4096

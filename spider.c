@@ -8,8 +8,8 @@
 
 void main()
 {
-  //system("mkdir temp");
-  char *hostname = "www.flaviomoura.mat.br";
+  system("mkdir temp");
+  char *hostname = "flaviomoura.mat.br";
   //hostname = (char *) malloc(HOSTSIZE*sizeof(char));
 
   //printf("Digite a URL desejada para executar o Spider:\n");
@@ -37,17 +37,16 @@ void spider(char *hostname, list* href_root)
   wf_name = (char *) malloc(HOSTSIZE*sizeof(char));
   tf_name = (char *) malloc(HOSTSIZE*sizeof(char));
 
-  sprintf(wf_name, "/temp/website_file_%d.txt", namecounter);
-  sprintf(tf_name, "/temp/tree_file_%d.txt", namecounter);
+  sprintf(wf_name, "../temp/website_file_%d.txt", namecounter);
+  sprintf(tf_name, "../temp/tree_file_%d.txt", namecounter);
 
   /* Server Response para o Host Atual */
-  printf("Hostname 1: %s\n", hostname);
   server_response(hostname, 1);
   namecounter++;
-  exit(0);
 
   /* Criação de arquivos temporários */
   createFiles(wf_name, website_file, tf_name, tree_file);
+  exit(0);
     
   /* Monta os txts com todos os srcs e hrefs da resposta do servidor */
   hrefBuilder(website_file, tree_file);

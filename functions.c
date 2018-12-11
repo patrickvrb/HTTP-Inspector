@@ -10,15 +10,15 @@ void createFiles(char *wf_name, FILE *website_file, char *tf_name, FILE *tree_fi
     website_file = fopen(wf_name, "r");
     tree_file = fopen(tf_name, "w");
 
-    if (tree_file == NULL)
+    if (website_file == NULL)
     {
-        printf("Erro ao abrir arquivos do spider(1)\n");
+        printf("Erro ao abrir arquivos do spider(wf)\n");
         exit(-1);
     }
 
-    if (website_file == NULL)
+    if (tree_file == NULL)
     {
-        printf("Erro ao abrir arquivos do spider(2)\n");
+        printf("Erro ao abrir arquivos do spider(tf)\n");
         exit(-1);
     }
 }
@@ -120,15 +120,14 @@ void server_response(char *request, int mode)
     FILE *website_file;
 
     char *wf_name;
-    wf_name = (char *) malloc(HOSTSIZE*sizeof(char));
-
-
-    sprintf(wf_name, "website_file_%d.txt", namecounter);
+    wf_name = (char *)malloc(HOSTSIZE*sizeof(char));
+    sprintf(wf_name, "/temp/website_file_%d.txt", namecounter);
+    printf("\n PATH: %s", wf_name);
 
     website_file = fopen(wf_name, "w");
     if (website_file == NULL)
     {
-        printf("Erro ao criar a Cache!\n");
+        printf("Erro ao criar o Website File\n");
         exit(-1);
     }
 
