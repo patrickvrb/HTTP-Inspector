@@ -97,10 +97,10 @@ int main(int argc, char const *argv[])
             else
             {
                 /* Envia o Request do Browser ao Servidor */
-                server_response(request);
+                server_response(request, 0);
                 /* Abertura da Cache local para ser lida */
                 FILE *website_file;
-                website_file = fopen("website_file.txt", "r");
+                website_file = fopen("temp/website_file_0.txt", "r");
                 if (website_file == NULL)
                 {
                     printf("Erro! Cache não encontrada!\n");

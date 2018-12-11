@@ -26,7 +26,7 @@ struct List
 typedef struct List list;
 void server_response(char *, int);
 void spider(char *, list *);
-void hrefBuilder(FILE *, FILE *);
+void hrefBuilder(char *, char *);
 int searchFile(char *, FILE *);
 list *searchList(char *, list *);
 list *createNode(void);
