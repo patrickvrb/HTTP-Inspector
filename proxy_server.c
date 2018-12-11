@@ -89,13 +89,13 @@ int main(int argc, char const *argv[])
             //Recebe Request do Browser
             memset(&request, '\0', sizeof(request));
             message_status = recv(browser_conn, request, sizeof(request), 0);
-
             if (message_status < 0)
             {
                 perror("Read Error");
             }
             else
             {
+                //printf("\nREQUEST SALVA : %s\n", request);
                 /* Envia o Request do Browser ao Servidor */
                 server_response(request, 0);
                 /* Abertura da Cache local para ser lida */
@@ -106,11 +106,12 @@ int main(int argc, char const *argv[])
                     printf("Erro! Cache não encontrada!\n");
                     exit(-1);
                 }
-                printf("Resposta do Servidor:\n");
-                while (fread(response, 1, sizeof(response), website_file) <= sizeof(response))
+                //printf("Resposta do Servidor:\n");
+                bzero(response, BUFFERSIZE);
+                while(fread(response, 1, BUFFERSIZE, website_file) <= BUFFERSIZE)
                 {
                     printf("%s", response);
-                    message_status = send(browser_conn, response, sizeof(response), 0);
+                    send(browser_conn, response, BUFFERSIZE, 0);
                     bzero(response, BUFFERSIZE);
                 }
                 printf("\nEscutando...\n");
@@ -119,6 +120,5 @@ int main(int argc, char const *argv[])
             fflush(stdout);
         }
     }
-
     return 0;
 }

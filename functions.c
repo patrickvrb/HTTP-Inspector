@@ -32,14 +32,16 @@ void server_response(char *request, int mode)
 {
     char *hostname, *server_ip, c;
     char newrequest[300];
-
+    
+    printf("\nREQUEST MODO 1:%s", request);
     int i = 1, j = 1;
 
     c = request[0];
     hostname = (char *)malloc(HOSTSIZE * sizeof(char));
     server_ip = (char *)malloc(33 * sizeof(char));
-
+    //printf("\nREQUEST SPIDER:%s-\n", request);
     /* Achar o hostname a partir do request */
+    
     if(mode == 0) {
         while (c != '/')
         {
@@ -55,12 +57,13 @@ void server_response(char *request, int mode)
         }
         hostname[j++] = '\0';
         strtok(hostname, "/");
-        printf("Hostname: %s\n", hostname);
+        printf("Hostname: %s\n", hostname); 
         
-    } else if (mode == 1) {
-        strcpy(hostname, request);
     }
-    
+    else if (mode == 1) {
+        strtok(request, "/");
+        printf("Hostname: %s\n", hostname);
+    }
     get_ip(hostname, server_ip);
     printf("IP Address: %s\n", server_ip);
     free(server_ip);
@@ -130,11 +133,13 @@ void server_response(char *request, int mode)
         exit(-1);
     }
 
-    while (read(proxy_server_socket, response, BUFFERSIZE))
+    do 
     {
-        fputs(response, website_file);
         bzero(response, BUFFERSIZE);
-    }
+        read(proxy_server_socket, response, BUFFERSIZE);
+        fputs(response, website_file);
+    }while(strstr(response, "</html>") == NULL);
+
     close(proxy_server_socket);
     fclose(website_file);
     free(response);
@@ -172,7 +177,7 @@ int findMethod(char *str, int mode)
  * Funcao que descobre o IP do servidor atraves do Hostname
  * A funcao gethostbyname faz todo o trabalho
  */
- 
+
 void get_ip(char *hostname, char *ip)
 {
     struct hostent *he;
@@ -343,7 +348,7 @@ void hrefBuilder(char *website_file, char *tree_file)
     {
         href_result = findHref(wf_name, 0);
         printf("***HREF***: %s\n", href_result);
-        fprintf(tf_name, "CONTADOR  = %d -> href=%c%s%c\n", cont++, '"', href_result, '"');
+        fprintf(tf_name, "%d -> href=%c%s%c\n", cont++, '"', href_result, '"');
         c = (char)fgetc(wf_name);
     } while (c != EOF);
 
@@ -353,7 +358,7 @@ void hrefBuilder(char *website_file, char *tree_file)
     {
         href_result = findHref(wf_name, 1);
         printf("***SRC***: %s\n", href_result);
-        fprintf(tf_name, "CONTADOR  = %d -> src=%c%s%c\n", cont++, '"', href_result, '"');
+        fprintf(tf_name, "%d -> src=%c%s%c\n", cont++, '"', href_result, '"');
         c = (char)fgetc(wf_name);
     } while (c != EOF);
                 
